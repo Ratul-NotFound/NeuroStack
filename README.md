@@ -1,59 +1,68 @@
-# Personal AI-Powered Knowledge Hub
+# 🧠 NuroStack
 
-A production-ready, automation-first knowledge repository that collects, summarizes, and categorizes content from your favorite sources using Gemini 1.5 Flash.
+**NuroStack** is a zero-cost, automation-first Personal AI Knowledge Hub. It automatically monitors RSS feeds and YouTube channels, uses Gemini 1.5 Flash to summarize complex technical content, and stores everything in a high-performance, searchable dashboard.
 
-## Features
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Firebase%20%7C%20Gemini-orange)
 
-- **Daily Automation**: Automatically fetches new content from RSS feeds.
-- **AI Summarization**: Uses Gemini 1.5 Flash to create concise markdown summaries.
-- **Smart Caching**: IndexedDB-based client-side cache minimizes Firestore reads.
-- **Admin Panel**: Manage sources, categories, and create manual entries.
-- **PWA Ready**: Installable on mobile and desktop with offline support.
-- **Zero Cost**: Stays within free tiers of Firebase, Gemini, and GitHub Actions.
+## ✨ Features
 
-## Setup Instructions
+- 🤖 **AI Summarization**: Powered by Google Gemini 1.5 Flash for high-quality technical insights.
+- 🍱 **Master-Detail UX**: Modern three-pane interface for lightning-fast content scanning.
+- 🔄 **Auto-Fetch Engine**: Automated daily runs via GitHub Actions.
+- 📱 **PWA Ready**: Fully responsive and installable on mobile devices.
+- 🔐 **Secure Admin**: Protected management panel for managing sources and categories.
+- 🎨 **Premium UI**: Crafted with Inter typography and a sophisticated dark-mode aesthetic.
 
-### 1. Firebase Setup
-1. Create a project at [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Firestore Database** in production mode.
-3. Enable **Authentication** with the **Email/Password** provider.
-4. Create your first admin user manually in the Auth tab.
-5. Go to Project Settings > Service Accounts > Generate new private key. Save this JSON.
-6. Create a Web App in Project Settings to get your client-side config keys.
+## 🚀 Tech Stack
 
-### 2. Google AI (Gemini) Setup
-1. Get an API key from [Google AI Studio](https://aistudio.google.com/).
+- **Frontend**: React, Vite, Tailwind CSS, Lucide Icons.
+- **Backend**: Firebase Firestore, Firebase Authentication.
+- **AI**: Google Gemini 1.5 Flash.
+- **Automation**: Node.js, GitHub Actions.
 
-### 3. GitHub Secrets
-Add the following secrets to your repository:
-- `FIREBASE_SERVICE_ACCOUNT_JSON`: The entire content of your service account JSON key.
-- `GEMINI_API_KEY`: Your Gemini API key.
+## 🛠️ Getting Started
 
-### 4. Deployment
-- **Frontend**: Connect your repo to Vercel. Set the root directory to `frontend`. Add your Firebase config as environment variables (prefixed with `VITE_`).
-- **Automation**: The GitHub Action in `.github/workflows/daily-fetch.yml` will handle the daily runs.
+### Prerequisites
+- Node.js 18+
+- A Firebase Project
+- A Gemini API Key
 
-### 5. Initial Seeding
-1. Deploy the frontend and log in.
-2. Go to **Management** (Admin) and add your first **Categories** and **Sources**.
-3. You can trigger the automation manually from the GitHub Actions tab.
+### Installation
 
-## Local Development
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Ratul-NotFound/NuroStack.git
+   cd NuroStack
+   ```
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+2. **Setup Frontend:**
+   ```bash
+   cd frontend
+   npm install
+   cp .env.example .env # Add your Firebase & Gemini keys
+   ```
 
-### Automation (Testing)
-```bash
-cd automation
-npm install
-# Create .env with required keys
-node index.js
-```
+3. **Setup Automation:**
+   ```bash
+   cd ../automation
+   npm install
+   # Add your service-account.json
+   ```
 
-## Firestore Security Rules
-Copy the content of `firestore.rules` to your Firebase Console > Firestore > Rules. Replace `ADMIN_UID_PLACEHOLDER` with your actual user UID.
+4. **Run Locally:**
+   ```bash
+   cd ..
+   npm run dev
+   ```
+
+## 🛡️ Security Rules
+
+Deploy the included `firestore.rules` to your Firebase project to ensure only you can manage the data.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+*Built with ❤️ for the AI community.*
