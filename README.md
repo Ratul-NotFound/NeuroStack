@@ -21,6 +21,18 @@
 - **AI**: Google Gemini 1.5 Flash.
 - **Automation**: Node.js, GitHub Actions.
 
+## 📂 Project Structure
+
+```text
+├── automation/          # AI Summarization Engine (Node.js)
+├── frontend/            # React + Vite Dashboard
+│   ├── src/components/  # Reusable UI Components
+│   ├── src/pages/       # Page Views & Logic
+│   └── src/hooks/       # Custom React Hooks
+├── firestore.rules      # Database Security Policy
+└── README.md            # System Documentation
+```
+
 ## 🛠️ Getting Started
 
 ### Prerequisites
