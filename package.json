@@ -1,5 +1,6 @@
 {
   "name": "knowledge-hub-monorepo",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix frontend && npm install --prefix automation",
