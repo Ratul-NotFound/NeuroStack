@@ -76,6 +76,27 @@
   @apply list-disc pl-5 mb-5 space-y-2;
 }
 
-.prose li {
-  @apply mb-1;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/10 rounded-full transition-colors;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/20;
+}
+
+.prose pre {
+  @apply bg-secondary/50 border border-border/50 rounded-2xl p-4;
+}
+
+.prose code {
+  @apply bg-secondary/50 px-1.5 py-0.5 rounded text-primary font-semibold;
 }
