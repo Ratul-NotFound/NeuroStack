@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin UID - replace with your actual UID from Firebase Console
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid == "5RmJoTMu8VdzCTD9ogBKfln1e1I3" || 
+        request.auth.token.email == "m.h.ratul18@gmail.com"
+      );
+    }
+
+    match /sources/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /posts/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /categories/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
