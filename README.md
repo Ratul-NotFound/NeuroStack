@@ -1,6 +1,6 @@
-# 🧠 NuroStack
+# 🧠 NeuroStack
 
-**NuroStack** is a zero-cost, automation-first Personal AI Knowledge Hub. It automatically monitors RSS feeds and YouTube channels, uses Gemini 1.5 Flash to summarize complex technical content, and stores everything in a high-performance, searchable dashboard.
+**NeuroStack** is a zero-cost, automation-first Personal AI Knowledge Hub. It automatically monitors RSS feeds and YouTube channels, uses Gemini 1.5 Flash to summarize complex technical content, and stores everything in a high-performance, searchable dashboard.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Firebase%20%7C%20Gemini-orange)

@@ -54,7 +54,7 @@ export function MainLayout() {
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2">
             <Menu size={24} />
           </button>
-          <span className="font-bold text-lg">NuroStack</span>
+          <span className="font-bold text-lg">NeuroStack</span>
           <button onClick={toggleTheme} className="p-2 -mr-2">
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>

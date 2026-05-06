@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'NuroStack',
-        short_name: 'NuroStack',
+        name: 'NeuroStack',
+        short_name: 'NeuroStack',
         description: 'Personal AI-Powered Knowledge Repository',
         theme_color: '#ffffff',
         icons: [

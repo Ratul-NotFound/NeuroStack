@@ -11,7 +11,7 @@ export function Sidebar({ categories, className }) {
           <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
             <Database size={22} />
           </div>
-          NuroStack
+          NeuroStack
         </h1>
       </div>
 
