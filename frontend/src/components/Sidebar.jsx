@@ -22,7 +22,10 @@ export function Sidebar({ categories, className }) {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      alert("📱 To install NeuroStack:\n\n1. Open your browser menu (⋮ or ⇧)\n2. Select 'Add to Home Screen' or 'Install App'.\n\nEnjoy the full app experience! 🧠");
+      return;
+    }
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
@@ -119,19 +122,22 @@ export function Sidebar({ categories, className }) {
         </div>
       </nav>
 
-      <div className="p-6 border-t border-border/50 space-y-3">
-        {isInstallable && (
-          <button 
-            onClick={handleInstallClick}
-            className="w-full flex items-center justify-between gap-3 px-5 py-4 bg-primary text-primary-foreground rounded-2xl font-bold text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 group"
-          >
-            <div className="flex items-center gap-3">
-              <Smartphone size={18} className="group-hover:scale-110 transition-transform" />
-              Install App
-            </div>
-            <Download size={16} className="opacity-50" />
-          </button>
-        )}
+      <div className="p-6 border-t border-border/50 space-y-4">
+        <button 
+          onClick={handleInstallClick}
+          className={cn(
+            "w-full flex items-center justify-between gap-3 px-5 py-4 rounded-2xl font-bold text-xs transition-all shadow-lg group",
+            isInstallable 
+              ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20" 
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-black/5"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Smartphone size={18} className="group-hover:scale-110 transition-transform" />
+            <span>{isInstallable ? "Install App" : "App Guide"}</span>
+          </div>
+          <Download size={16} className="opacity-50" />
+        </button>
 
         <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
           <div className="flex items-center gap-3">
