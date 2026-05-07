@@ -1,21 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Hash, Settings, PlusCircle, Database, Globe, Layers, RefreshCcw, User } from 'lucide-react';
+import { LayoutGrid, Hash, Settings, PlusCircle, Database, Layers, RefreshCcw, Smartphone, Download } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function Sidebar({ categories, className }) {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+    }
+  };
+
   return (
     <aside className={cn("w-72 border-r border-border/50 bg-card flex flex-col h-full shadow-[1px_0_0_0_rgba(0,0,0,0.05)]", className)}>
       <div className="p-8">
         <h1 className="text-xl font-bold tracking-tight flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <Database size={22} />
-          </div>
+          <img src="/pwa-192x192.png" alt="NeuroStack" className="w-10 h-10 rounded-xl shadow-lg shadow-primary/20" />
           NeuroStack
         </h1>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8">
+        {/* ... existing navigation ... */}
         <div>
           <h3 className="px-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em] mb-4">
             Intelligence
@@ -93,7 +119,20 @@ export function Sidebar({ categories, className }) {
         </div>
       </nav>
 
-      <div className="p-6 border-t border-border/50">
+      <div className="p-6 border-t border-border/50 space-y-3">
+        {isInstallable && (
+          <button 
+            onClick={handleInstallClick}
+            className="w-full flex items-center justify-between gap-3 px-5 py-4 bg-primary text-primary-foreground rounded-2xl font-bold text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 group"
+          >
+            <div className="flex items-center gap-3">
+              <Smartphone size={18} className="group-hover:scale-110 transition-transform" />
+              Install App
+            </div>
+            <Download size={16} className="opacity-50" />
+          </button>
+        )}
+
         <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10">
           <div className="flex items-center gap-3">
             <div className="relative">
