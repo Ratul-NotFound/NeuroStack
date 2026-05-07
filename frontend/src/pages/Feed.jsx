@@ -88,24 +88,24 @@ export function Feed() {
             </div>
           </div>
 
-          {/* New Temporal Filters */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border/30">
-            <div className="flex items-center p-1 bg-secondary/50 rounded-xl border border-border/50 backdrop-blur-sm">
+          {/* Temporal Filters */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-border/30">
+            <div className="flex items-center p-1 bg-secondary/50 rounded-xl border border-border/50 backdrop-blur-sm w-fit">
               <button 
                 onClick={() => setTimeFilter('all')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${timeFilter === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${timeFilter === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 All Time
               </button>
               <button 
                 onClick={() => setTimeFilter('week')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${timeFilter === 'week' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${timeFilter === 'week' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 This Week
               </button>
               <button 
                 onClick={() => setTimeFilter('today')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${timeFilter === 'today' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${timeFilter === 'today' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Today
               </button>
@@ -113,7 +113,7 @@ export function Feed() {
 
             <button 
               onClick={() => setSortOrder(prev => prev === 'latest' ? 'oldest' : 'latest')}
-              className="flex items-center gap-2 px-4 py-2 bg-card border border-border/50 rounded-xl text-xs font-bold hover:bg-secondary transition-all"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-card border border-border/50 rounded-xl text-[10px] sm:text-xs font-bold hover:bg-secondary transition-all w-full md:w-auto"
             >
               <RefreshCcw size={14} className={sortOrder === 'latest' ? '' : 'rotate-180'} />
               {sortOrder === 'latest' ? 'Showing Latest' : 'Showing Oldest'}
