@@ -53,24 +53,24 @@ export function Feed() {
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/70 backdrop-blur-xl border-b border-border/50 px-6 py-5 flex-shrink-0">
-        <div className="max-w-4xl mx-auto flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 py-3 sm:px-6 sm:py-5 flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex flex-col gap-3 sm:gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">{pageTitle}</h2>
-              <p className="text-muted-foreground text-sm font-medium mt-0.5">
-                {loading ? 'Synchronizing Intelligence...' : `${sortedPosts.length} insight${sortedPosts.length !== 1 ? 's' : ''} found`}
+              <h2 className="text-xl sm:text-3xl font-bold tracking-tight">{pageTitle}</h2>
+              <p className="text-muted-foreground text-[10px] sm:text-sm font-medium">
+                {loading ? 'Synchronizing Intelligence...' : `${sortedPosts.length} insights found`}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Search */}
-              <div className="relative group">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <div className="relative group flex-1 sm:flex-none">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="w-52 sm:w-72 bg-card border border-border/50 rounded-xl py-2.5 pl-9 pr-4 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  className="w-full sm:w-72 bg-card border border-border/50 rounded-xl py-2 sm:py-2.5 pl-9 pr-4 text-xs sm:text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -79,33 +79,32 @@ export function Feed() {
               {import.meta.env.DEV && (
                 <button
                   onClick={refreshCache}
-                  title="Clear cache"
-                  className="p-2.5 bg-card border border-border/50 hover:bg-secondary rounded-xl transition-all text-muted-foreground hover:text-primary"
+                  className="p-2 sm:p-2.5 bg-card border border-border/50 hover:bg-secondary rounded-xl transition-all text-muted-foreground"
                 >
-                  <RefreshCcw size={18} className={loading ? 'animate-spin text-primary' : ''} />
+                  <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Temporal Filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-border/30">
-            <div className="flex items-center p-1 bg-secondary/50 rounded-xl border border-border/50 backdrop-blur-sm w-fit">
+          {/* Temporal Filters & Sort */}
+          <div className="flex items-center justify-between gap-2 border-t border-border/20 pt-2 sm:pt-4">
+            <div className="flex items-center p-0.5 bg-secondary/30 rounded-lg border border-border/30 overflow-x-auto no-scrollbar">
               <button 
                 onClick={() => setTimeFilter('all')}
-                className={`px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${timeFilter === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md whitespace-nowrap ${timeFilter === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'}`}
               >
                 All Time
               </button>
               <button 
                 onClick={() => setTimeFilter('week')}
-                className={`px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${timeFilter === 'week' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md whitespace-nowrap ${timeFilter === 'week' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'}`}
               >
-                This Week
+                Week
               </button>
               <button 
                 onClick={() => setTimeFilter('today')}
-                className={`px-4 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${timeFilter === 'today' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md whitespace-nowrap ${timeFilter === 'today' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'}`}
               >
                 Today
               </button>
@@ -113,10 +112,10 @@ export function Feed() {
 
             <button 
               onClick={() => setSortOrder(prev => prev === 'latest' ? 'oldest' : 'latest')}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-card border border-border/50 rounded-xl text-[10px] sm:text-xs font-bold hover:bg-secondary transition-all w-full md:w-auto"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border/50 rounded-lg text-[10px] font-bold hover:bg-secondary transition-all"
             >
-              <RefreshCcw size={14} className={sortOrder === 'latest' ? '' : 'rotate-180'} />
-              {sortOrder === 'latest' ? 'Showing Latest' : 'Showing Oldest'}
+              <RefreshCcw size={12} className={sortOrder === 'latest' ? '' : 'rotate-180'} />
+              {sortOrder === 'latest' ? 'Latest' : 'Oldest'}
             </button>
           </div>
         </div>
@@ -131,7 +130,7 @@ export function Feed() {
       )}
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto px-6 py-6">
+      <main className="flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-6">
         <div className="max-w-4xl mx-auto">
           {loading && posts.length === 0 ? (
             /* Skeleton loaders */
