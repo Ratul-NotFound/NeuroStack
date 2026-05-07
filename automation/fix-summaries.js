@@ -24,8 +24,8 @@ async function fixSummaries() {
     console.log(`[${i+1}/${brokenPosts.length}] ✨ Repairing: "${data.title.substring(0, 50)}..."`);
 
     try {
-      // Use 10s delay to be 100% safe under OpenRouter's 8RPM limit
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      // DELAY: 30 seconds to stay under free tier radar
+      await new Promise(resolve => setTimeout(resolve, 30000));
 
       const result = await summarizeContent(
         data.title, 
