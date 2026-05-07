@@ -1,35 +1,53 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import dotenv from 'dotenv';
-
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { readFileSync, existsSync } from 'fs';
 
-import { readFileSync } from 'fs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: join(__dirname, '.env') });
 
-const serviceAccount = JSON.parse(
-  readFileSync(join(__dirname, 'service-account.json'), 'utf8')
-);
+let serviceAccount;
 
-// Thoroughly sanitize the private key
-serviceAccount.private_key = serviceAccount.private_key
-  .replace(/\\n/g, '\n')
-  .trim();
-
-// Ensure it starts and ends correctly
-if (!serviceAccount.private_key.startsWith('-----BEGIN PRIVATE KEY-----')) {
-  serviceAccount.private_key = `-----BEGIN PRIVATE KEY-----\n${serviceAccount.private_key}`;
+// Strategy 1: Try service-account.json file (local dev — most reliable)
+const jsonPath = join(__dirname, 'service-account.json');
+if (existsSync(jsonPath)) {
+  try {
+    serviceAccount = JSON.parse(readFileSync(jsonPath, 'utf8'));
+    console.log('✅ Firebase: loaded credentials from service-account.json');
+  } catch (e) {
+    console.warn('⚠️  service-account.json found but failed to parse:', e.message);
+  }
 }
-if (!serviceAccount.private_key.endsWith('-----END PRIVATE KEY-----')) {
-  serviceAccount.private_key = `${serviceAccount.private_key}\n-----END PRIVATE KEY-----`;
+
+// Strategy 2: Fall back to FIREBASE_SERVICE_ACCOUNT_JSON env var (GitHub Actions)
+if (!serviceAccount && process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    console.log('✅ Firebase: loaded credentials from FIREBASE_SERVICE_ACCOUNT_JSON env var');
+  } catch (e) {
+    console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', e.message);
+    process.exit(1);
+  }
+}
+
+if (!serviceAccount) {
+  console.error('❌ No Firebase credentials found!');
+  console.error('   Local dev: place service-account.json in automation/');
+  console.error('   GitHub Actions: set FIREBASE_SERVICE_ACCOUNT_JSON secret');
+  process.exit(1);
+}
+
+// Sanitize private key — handles escaped newlines from JSON strings
+if (serviceAccount.private_key) {
+  serviceAccount.private_key = serviceAccount.private_key
+    .replace(/\\n/g, '\n')
+    .trim();
 }
 
 if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceAccount)
-  });
+  initializeApp({ credential: cert(serviceAccount) });
 }
 
 export const db = getFirestore();

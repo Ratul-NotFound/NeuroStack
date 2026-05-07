@@ -36,27 +36,42 @@ export function usePostsWithCache(category = 'all') {
         };
 
         // 2. Determine if we need to fetch from Firestore
-        // If last fetch was > 24h ago or cache is empty
         const isExpired = !lastFetch || (now - lastFetch > 24 * 60 * 60 * 1000);
 
-        if (isExpired || cachedPosts.length === 0) {
-          console.log('Cache expired or empty, fetching fresh posts...');
+        if (isExpired || cachedPosts.length === 0 || category !== 'all') {
+          console.log(`Fetching fresh posts for category: ${category}`);
           const postsRef = collection(db, 'posts');
-          const q = query(postsRef, orderBy('publishedAt', 'desc'), limit(100));
-          const snapshot = await getDocs(q);
           
-          const newPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          
-          // Update IDB
-          const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
-          await tx.objectStore(STORE_POSTS).clear();
-          for (const post of newPosts) {
-            await tx.objectStore(STORE_POSTS).put(post);
+          let q;
+          if (category === 'all') {
+            q = query(postsRef, orderBy('publishedAt', 'desc'), limit(100));
+          } else {
+            // Remove orderBy here to avoid index requirement; sort in JS instead
+            q = query(postsRef, where('category', '==', category), limit(200));
           }
-          await tx.objectStore(STORE_META).put(now, 'lastFetch');
-          await tx.done;
+          
+          const snapshot = await getDocs(q);
+          let newPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          
+          // Sort in JS to avoid composite index requirement
+          if (category !== 'all') {
+            newPosts = newPosts.sort((a, b) => 
+              (b.publishedAt?.seconds || 0) - (a.publishedAt?.seconds || 0)
+            );
+          }
+          
+          // Only update cache for 'all' to avoid messing up global cache with partial data
+          if (category === 'all') {
+            const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
+            await tx.objectStore(STORE_POSTS).clear();
+            for (const post of newPosts) {
+              await tx.objectStore(STORE_POSTS).put(post);
+            }
+            await tx.objectStore(STORE_META).put(now, 'lastFetch');
+            await tx.done;
+          }
 
-          setPosts(filterPosts(newPosts));
+          setPosts(newPosts);
         } else {
           // 3. Incrementally fetch new posts since lastFetch
           console.log('Incremental fetch for new posts...');
@@ -100,10 +115,17 @@ export function usePostsWithCache(category = 'all') {
   }, [category]);
 
   const refreshCache = async () => {
-    const idb = await openDB(DB_NAME, 1);
-    await idb.clear(STORE_POSTS);
-    await idb.clear(STORE_META);
-    window.location.reload();
+    try {
+      const idb = await openDB(DB_NAME, 1);
+      const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
+      await tx.objectStore(STORE_POSTS).clear();
+      await tx.objectStore(STORE_META).clear();
+      await tx.done;
+      window.location.reload();
+    } catch (err) {
+      console.error('Cache clear error:', err);
+      window.location.reload();
+    }
   };
 
   return { posts, loading, error, refreshCache };

@@ -42,7 +42,7 @@ export function ManageSources() {
           ...newSource,
           active: true,
           createdAt: Timestamp.now(),
-          lastFetched: null
+          lastFetch: null
         });
       }
       setNewSource({ name: '', url: '', type: 'rss', category: categories[0]?.id || '' });

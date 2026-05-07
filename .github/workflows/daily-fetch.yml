@@ -2,31 +2,44 @@ name: Daily AI Content Fetch
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at midnight every day
-  workflow_dispatch: # Allows manual trigger
+    - cron: '0 6 * * *'  # Runs at 06:00 UTC every day (as per spec)
+  workflow_dispatch:       # Allow manual trigger from GitHub Actions UI
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    timeout-minutes: 30
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: automation/package-lock.json
 
-      - name: Install Dependencies
+      - name: Install dependencies
+        working-directory: automation
+        run: npm ci
+
+      - name: Write Firebase service account
+        working-directory: automation
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
-          cd automation
-          npm install
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > service-account.json
 
-      - name: Run Fetcher
+      - name: Run automation script
+        working-directory: automation
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          cd automation
-          echo $FIREBASE_SERVICE_ACCOUNT > service-account.json
-          node index.js
+          # YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}  # Optional
+        run: node index.js
+
+      - name: Cleanup service account file
+        if: always()
+        working-directory: automation
+        run: rm -f service-account.json

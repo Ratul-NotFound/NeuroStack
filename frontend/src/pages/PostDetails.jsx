@@ -53,8 +53,8 @@ export function PostDetails() {
     : new Date();
 
   return (
-    <div className="min-h-full bg-background/50">
-      <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-background/50 flex flex-col">
+      <div className="max-w-4xl mx-auto px-6 py-12 pb-32 flex-1 w-full">
         <button 
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-12 group"
@@ -107,7 +107,7 @@ export function PostDetails() {
           </div>
         </header>
 
-        <article className="prose prose-lg dark:prose-invert prose-primary max-w-none bg-card border border-border/50 rounded-3xl p-8 md:p-12 shadow-sm">
+        <article className="prose prose-lg dark:prose-invert prose-primary max-w-none bg-card border border-border/50 rounded-3xl p-8 md:p-12 shadow-sm prose-headings:tracking-tight prose-p:leading-relaxed prose-li:leading-relaxed prose-strong:text-primary">
           <ReactMarkdown>{post.summary}</ReactMarkdown>
         </article>
       </div>
