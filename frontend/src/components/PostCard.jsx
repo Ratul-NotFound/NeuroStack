@@ -10,7 +10,10 @@ export function PostCard({ post }) {
     : new Date();
 
   return (
-    <div className="group bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-[0_2px_10px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1">
+    <Link 
+      to={`/post/${post.id}`}
+      className="group block bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-[0_2px_10px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_30px_50px_-12px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] active:scale-[0.98] border-b-4 hover:border-primary/50"
+    >
       <div className="p-8">
         <div className="flex items-center gap-3 mb-6">
           <span className="px-3 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full uppercase tracking-widest">
@@ -24,30 +27,33 @@ export function PostCard({ post }) {
         </div>
 
         <h2 className="text-2xl font-semibold mb-4 leading-tight tracking-tight group-hover:text-primary transition-colors">
-          <Link to={`/post/${post.id}`} className="hover:underline">
-            {post.title}
-          </Link>
+          {post.title}
         </h2>
 
-        <div className="prose prose-sm dark:prose-invert line-clamp-4 mb-8 text-foreground/70 leading-relaxed">
+        <div className="prose prose-sm dark:prose-invert line-clamp-4 mb-8 text-foreground/70 leading-relaxed group-hover:text-foreground transition-colors">
           <ReactMarkdown>{post.summary}</ReactMarkdown>
         </div>
 
         <div className="flex items-center justify-between pt-6 border-t border-border/50 mt-auto">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-primary border shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-primary border shadow-sm group-hover:border-primary/30 transition-all">
               <User size={14} />
             </div>
             <span className="text-sm font-semibold tracking-tight">{post.sourceName}</span>
           </div>
           
-          {post.isCustom && (
-            <span className="text-[10px] bg-amber-500/10 text-amber-600 px-2 py-1 rounded-md font-bold uppercase tracking-wider border border-amber-500/20">
-              Original
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {post.isCustom && (
+              <span className="text-[10px] bg-amber-500/10 text-amber-600 px-2 py-1 rounded-md font-bold uppercase tracking-wider border border-amber-500/20">
+                Original
+              </span>
+            )}
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+              <ExternalLink size={16} />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
