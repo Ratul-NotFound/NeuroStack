@@ -153,6 +153,14 @@ export function Sidebar({ categories, className }) {
             </div>
           </div>
         </div>
+
+        <div className="pt-4 flex items-center justify-center gap-2 opacity-40 hover:opacity-100 transition-opacity duration-500 cursor-default">
+          <div className="h-[1px] w-4 bg-muted-foreground/30"></div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground whitespace-nowrap">
+            Crafted by <span className="text-primary font-black">Ratul</span>
+          </p>
+          <div className="h-[1px] w-4 bg-muted-foreground/30"></div>
+        </div>
       </div>
     </aside>
   );
