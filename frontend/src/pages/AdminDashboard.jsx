@@ -44,6 +44,48 @@ export function AdminDashboard() {
     loadStats();
   }, []);
 
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(null); // 'success', 'error'
+
+  const handleManualSync = async () => {
+    const token = import.meta.env.VITE_GITHUB_TOKEN;
+    const repo = import.meta.env.VITE_GITHUB_REPO; // Format: "username/repo"
+
+    if (!token || !repo) {
+      alert("⚠️ GitHub API not configured. Please add VITE_GITHUB_TOKEN and VITE_GITHUB_REPO to your .env file.");
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncStatus(null);
+
+    try {
+      const response = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/daily-fetch.yml/dispatches`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ref: 'main' }),
+      });
+
+      if (response.ok) {
+        setSyncStatus('success');
+        setTimeout(() => setSyncStatus(null), 5000);
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to trigger');
+      }
+    } catch (err) {
+      console.error('Sync trigger error:', err);
+      setSyncStatus('error');
+      alert(`❌ Error: ${err.message}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const statCards = [
     { label: 'Total Posts', value: stats.posts, icon: FileText, color: 'text-blue-500', bg: 'bg-blue-500/10', link: '/admin/posts' },
     { label: 'Active Sources', value: stats.sources, icon: Database, color: 'text-emerald-500', bg: 'bg-emerald-500/10', link: '/admin/sources' },
@@ -53,9 +95,24 @@ export function AdminDashboard() {
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">System overview and quick actions.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">System overview and quick actions.</p>
+        </div>
+        
+        <button
+          onClick={handleManualSync}
+          disabled={isSyncing}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg ${
+            syncStatus === 'success' ? 'bg-emerald-500 text-white' :
+            syncStatus === 'error' ? 'bg-red-500 text-white' :
+            'bg-card border border-border/50 hover:border-primary text-foreground hover:text-primary'
+          } ${isSyncing ? 'opacity-50 cursor-wait' : ''}`}
+        >
+          <RefreshCcw size={18} className={isSyncing ? 'animate-spin' : ''} />
+          {isSyncing ? 'Syncing...' : syncStatus === 'success' ? 'Sync Triggered!' : 'Trigger Manual Sync'}
+        </button>
       </div>
 
       {/* Last Fetch Status */}
