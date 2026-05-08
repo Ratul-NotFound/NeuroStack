@@ -151,9 +151,9 @@ PREFERRED CATEGORY: ${heuristicCategory || categoryHint || 'auto-detect'}
 
 Return ONLY valid JSON matching exactly this schema (do not wrap in markdown):
 {
-  "summary": "A highly educational explanation in markdown. Use \\n\\n for paragraphs. MUST include:\\n\\n**Core Concept**\\nDirectly teach the main topic.\\n\\n**Key Mechanisms & Details**\\n- Teach point 1\\n- Teach point 2\\n\\n**Why It Matters**\\nA concluding paragraph on its real-world impact or use case.",
+  "summary": "A highly educational multi-section markdown entry. Use \\n\\n for paragraphs. MUST match this structure exactly:\\n\\n🎯 **What This Is About**\\n(Directly explain the topic)\\n\\n📚 **Key Concepts Explained**\\n**Term**: Detailed explanation.\\n\\n🔑 **Key Takeaways**\\n→ Important point 1\\n→ Important point 2\\n\\n💡 **Why This Matters**\\n(Paragraph on significance)\\n\\n🛠️ **Practical Application**\\n(How to use this knowledge)",
   "category": "exact_id_from_list"
-}`;
+} `;
 
   const providers = [
     { name: 'Gemini 2.0', fn: tryGemini },
