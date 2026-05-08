@@ -31,7 +31,13 @@ export function PostCard({ post }) {
         </h2>
 
         <div className="prose prose-sm dark:prose-invert line-clamp-4 mb-8 text-foreground/70 leading-relaxed group-hover:text-foreground transition-colors">
-          <ReactMarkdown>{post.summary}</ReactMarkdown>
+          <ReactMarkdown
+            components={{
+              a: ({node, ...props}) => <span className="text-primary font-medium" {...props} />
+            }}
+          >
+            {post.summary}
+          </ReactMarkdown>
         </div>
 
         <div className="flex items-center justify-between pt-6 border-t border-border/50 mt-auto">

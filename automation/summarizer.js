@@ -35,15 +35,23 @@ console.log(`🤖 AI Providers loaded:
 
 // ── Heuristic Classifier ─────────────────────────────────────────────────────
 
-function heuristicClassify(title, tagList, categoryHint) {
+function heuristicClassify(title, tagList) {
   const text = (title + ' ' + tagList).toLowerCase();
-  if (/\b(react|vue|angular|css|tailwind|html|javascript|js|typescript|ts|node|express|nextjs|frontend|backend|ui|ux|figma|web|website|api|database|sql|mongodb|postgres|vercel|netlify|supabase|auth|stripe|prisma|graphql|rest|socket|pwa|responsive|flexbox|grid|sass|component|hook|state|redux|vite|webpack|npm|yarn|deno|bun)\b/.test(text)) return 'web-development';
-  if (/\b(machine learning|ml|pytorch|tensorflow|scikit|pandas|numpy|data science|training|model|dataset|inference|cuda|gpu|tensor|keras|transformer|bert|cnn|rnn|lstm|regression|clustering|classifier|accuracy|backprop|weights)\b/.test(text)) return 'machine-learning';
-  if (/\b(python|rust|cpp|c\+\+|java|golang|ruby|php|kotlin|swift|coding|tutorial|algorithm|dsa|leetcode|architecture|linux|terminal|shell|git|docker|kubernetes|devops|aws|azure|gcp|cloud|serverless|microservice|security|bug|fix)\b/.test(text)) return 'programming';
-  if (/\b(ai|artificial intelligence|llm|gpt|claude|gemini|llama|agent|prompt|neural|chatbot|openai|anthropic|stable diffusion|copilot|mistral|grok|deepseek|agentic|rag|vector|embeddings|ollama)\b/.test(text)) return 'ai';
-  if (/\b(hardware|chip|processor|space|nasa|spacex|gadget|iphone|android|breakthrough|future|industry|electric|ev|tesla|energy|battery|robot|drone|iot|quantum|crypto|blockchain|ar|vr|metaverse)\b/.test(text)) return 'new-tech';
-  if (categoryHint) return categoryHint;
-  return 'general';
+  
+  // Strong keyword matching for precise override
+  if (/\b(react|vue|angular|css|tailwind|html|javascript|js|typescript|ts|node|express|nextjs|frontend|backend|vercel|netlify|supabase|graphql|pwa)\b/.test(text)) return 'web-development';
+  if (/\b(machine learning|ml|pytorch|tensorflow|scikit|pandas|numpy|inference|cuda|gpu|tensor|keras|transformer|bert|cnn|rnn|lstm)\b/.test(text)) return 'machine-learning';
+  if (/\b(python|rust|cpp|c\+\+|java|golang|ruby|php|kotlin|swift|coding|tutorial|algorithm|dsa|leetcode)\b/.test(text)) return 'programming';
+  if (/\b(ai|artificial intelligence|llm|gpt|claude|gemini|llama|agent|prompt|neural|chatbot|openai|anthropic|stable diffusion|copilot|mistral|grok|deepseek|rag|vector|embeddings|ollama)\b/.test(text)) return 'ai';
+  if (/\b(hardware|chip|processor|space|nasa|spacex|gadget|iphone|android|breakthrough|industry|electric|ev|tesla|energy|battery|robot|drone|iot|quantum|crypto|blockchain|ar|vr|metaverse)\b/.test(text)) return 'new-tech';
+  if (/\b(cybersecurity|security|hack|exploit|vulnerability|malware|phishing|ransomware|encryption|auth|zerotrust|firewall)\b/.test(text)) return 'cybersecurity';
+  if (/\b(data science|data analyst|big data|analytics|visualization|hadoop|spark|sql|database|mongodb|postgres)\b/.test(text)) return 'data-science';
+  if (/\b(design|ui|ux|figma|adobe|photoshop|illustrator|prototype|wireframe|usability|typography)\b/.test(text)) return 'design-ui';
+  if (/\b(devops|cloud|aws|azure|gcp|docker|kubernetes|k8s|ci|cd|jenkins|terraform|microservice|linux|serverless)\b/.test(text)) return 'devops-cloud';
+  if (/\b(mobile|ios|android|react native|flutter|swiftui|kotlin|xcode|app store)\b/.test(text)) return 'mobile-dev';
+  
+  // Return null if no strong match, letting the AI do the smart categorization
+  return null;
 }
 
 // ── Individual Provider Calls ────────────────────────────────────────────────
@@ -63,7 +71,7 @@ async function tryGroq(prompt) {
     model: 'llama-3.3-70b-versatile',
     temperature: 0.1,
     response_format: { type: 'json_object' },
-    max_tokens: 1024
+    max_tokens: 2048
   });
   const text = chat.choices[0].message.content;
   if (!text || text.length < 20) throw new Error('Groq returned empty response');
@@ -82,7 +90,7 @@ async function tryTogether(prompt) {
       model: 'meta-llama/Llama-3-8b-chat-hf',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,
-      max_tokens: 1024
+      max_tokens: 2048
     })
   });
   const data = await response.json();
@@ -131,17 +139,21 @@ export async function summarizeContent(title, description, content, allowedCateg
     console.log(`   💡 Heuristic: ${heuristicCategory}`);
   }
 
-  const prompt = `You are a professional technology editor. Analyze this ${sourceType} and return ONLY valid JSON.
+  const prompt = `You are an expert technical educator and knowledge curator. Your job is to extract the core concepts from the provided content and TEACH THEM directly to the reader. 
+DO NOT write a summary "about the article" (e.g., never say "This article discusses" or "The author explains"). Instead, write a standalone mini-tutorial or knowledge base entry.
 
 TITLE: ${title}
 TAGS: ${tagList || 'None'}
 CONTENT: ${contentBody || '[No content provided]'}
 
-AVAILABLE CATEGORY IDs (pick exactly one): ai, machine-learning, web-development, programming, new-tech, general
+AVAILABLE CATEGORY IDs (pick exactly one): ai, machine-learning, web-development, programming, new-tech, cybersecurity, data-science, design-ui, devops-cloud, mobile-dev, general
 PREFERRED CATEGORY: ${heuristicCategory || categoryHint || 'auto-detect'}
 
-Return ONLY this JSON (no markdown, no explanation):
-{"summary": "A 3-5 sentence professional summary in markdown","category": "exact_id_from_list"}`;
+Return ONLY valid JSON matching exactly this schema (do not wrap in markdown):
+{
+  "summary": "A highly educational explanation in markdown. Use \\n\\n for paragraphs. MUST include:\\n\\n**Core Concept**\\nDirectly teach the main topic.\\n\\n**Key Mechanisms & Details**\\n- Teach point 1\\n- Teach point 2\\n\\n**Why It Matters**\\nA concluding paragraph on its real-world impact or use case.",
+  "category": "exact_id_from_list"
+}`;
 
   const providers = [
     { name: 'Gemini 2.0', fn: tryGemini },
@@ -189,7 +201,9 @@ function parseAIResponse(text, allowedCategories) {
   const nameToId = {
     'artificial intelligence': 'ai', 'web development': 'web-development',
     'web dev': 'web-development', 'machine learning': 'machine-learning',
-    'new tech': 'new-tech', 'programming': 'programming', 'general': 'general'
+    'new tech': 'new-tech', 'programming': 'programming', 'general': 'general',
+    'cybersecurity': 'cybersecurity', 'data science': 'data-science',
+    'design ui': 'design-ui', 'devops cloud': 'devops-cloud', 'mobile dev': 'mobile-dev'
   };
   let category = parsed.category?.toLowerCase().trim();
   if (nameToId[category]) category = nameToId[category];

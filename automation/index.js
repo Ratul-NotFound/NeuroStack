@@ -243,7 +243,71 @@ async function main() {
   });
   console.log('');
 
+  // ── Step 5: Auto-Repair Backlog ───────────────
+  await autoRepairBacklog(allowedCategories);
+
   process.exit(0);
+}
+
+// ──────────────────────────────────────────────
+// Auto-Repair Backlog Function
+// ──────────────────────────────────────────────
+async function autoRepairBacklog(allowedCategories) {
+  console.log('\n╔══════════════════════════════════════════════╗');
+  console.log('║   🛠️  Auto-Repairing Backlog (If tokens left)║');
+  console.log('╚══════════════════════════════════════════════╝');
+
+  const BATCH_LIMIT = 20; // Steady daily pace to save tokens for future scaling
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const snap = await db.collection('posts')
+    .where('fetchedAt', '<', Timestamp.fromDate(today))
+    .orderBy('fetchedAt', 'asc')
+    .limit(BATCH_LIMIT * 4)
+    .get();
+
+  const BROKEN_PHRASES = ['auto-summary unavailable', 'ai summary pending', 'ai summary unavailable', 'quota reset', 'will be auto-repaired', 'view the original content for full details'];
+  
+  const candidates = snap.docs.map(d => ({ id: d.id, ref: d.ref, ...d.data() }));
+  const brokenDocs = candidates.filter(p => {
+    if (!p.summary || p.summary.length < 20) return true;
+    const lower = p.summary.toLowerCase();
+    return BROKEN_PHRASES.some(phrase => lower.includes(phrase));
+  }).slice(0, BATCH_LIMIT);
+
+  if (brokenDocs.length === 0) {
+    console.log('   ✅ No broken posts found in the backlog. Permanent repair complete!');
+    return;
+  }
+
+  console.log(`   📡 Found ${brokenDocs.length} broken posts. Attempting repair...`);
+  
+  let fixed = 0;
+  for (let i = 0; i < brokenDocs.length; i++) {
+    const post = brokenDocs[i];
+    
+    await delay(6000); // 6s delay for free-tier rate limits
+    const result = await summarizeContent(post.title || 'Untitled', '', post.summary || '', allowedCategories, 'article', post.category || '');
+    
+    const lowerResult = result.summary.toLowerCase();
+    const isStillBroken = BROKEN_PHRASES.some(phrase => lowerResult.includes(phrase));
+    
+    if (isStillBroken) {
+      console.log(`   ⚠️  AI returned fallback. Tokens likely exhausted. Stopping backlog repair for today.`);
+      break; 
+    } else {
+      await post.ref.update({
+        summary: result.summary,
+        category: result.category,
+        repairedAt: Timestamp.now()
+      });
+      console.log(`   ✅ Fixed: "${post.title.substring(0, 50)}..."`);
+      fixed++;
+    }
+  }
+  
+  console.log(`   🛠️  Repaired ${fixed} posts today.`);
 }
 
 main().catch(err => {

@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-const DB_NAME    = 'neurostack-v3';   // new name = fresh start, no old corruption
+const DB_NAME    = 'neurostack-v7';   // fresh cache for educational concept summaries
 const STORE_POSTS = 'posts';
 const STORE_META  = 'meta';
 const PAGE_SIZE  = 50;

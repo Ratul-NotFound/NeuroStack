@@ -11,7 +11,7 @@ import { db, Timestamp } from './firestore.js';
 import { summarizeContent } from './summarizer.js';
 
 const DELAY_MS    = 8000;  // 8s between AI calls — safe for Groq 30RPM free tier
-const BATCH_LIMIT = 50;    // Only process 50 posts per run to protect quota
+const BATCH_LIMIT = 200;   // Process a large batch to utilize free daily tokens
 
 // All fallback phrases we want to repair
 const BROKEN_PHRASES = [
