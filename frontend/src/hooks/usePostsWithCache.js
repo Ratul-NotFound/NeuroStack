@@ -1,119 +1,194 @@
-import { useState, useEffect } from 'react';
+/**
+ * usePostsWithCache — Smart Differential Sync Engine
+ *
+ * Firebase read strategy:
+ *  - First visit:      fetch latest 500 posts (500 reads, one time ever)
+ *  - Daily sync:       fetch ONLY posts published since lastSync (~10–50 reads)
+ *  - Already cached:   0 Firebase reads — served entirely from IndexedDB
+ *
+ * UI strategy:
+ *  - Exposes ALL cached posts for accurate count calculation
+ *  - Paginates 50 at a time locally (0 Firebase reads per "Load More")
+ */
+import { useState, useEffect, useCallback } from 'react';
 import { openDB } from 'idb';
-import { collection, query, where, getDocs, orderBy, limit, startAfter, Timestamp } from 'firebase/firestore';
+import {
+  collection, query, where, getDocs,
+  orderBy, limit, Timestamp
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-const DB_NAME    = 'knowledge-hub-cache';
-const DB_VERSION = 2; // bump version to auto-clear corrupted cache
+const DB_NAME    = 'neurostack-v3';   // new name = fresh start, no old corruption
 const STORE_POSTS = 'posts';
 const STORE_META  = 'meta';
-
-const CACHE_TTL_MS   = 24 * 60 * 60 * 1000; // 24 hours before full re-sync
-const BATCH_SIZE     = 500; // fetch 500 posts per Firebase round-trip
-const MAX_CACHE_POSTS = 1000; // keep up to 1000 in IndexedDB
+const PAGE_SIZE  = 50;
+const INITIAL_FETCH = 500;            // reads on first ever visit
+const SYNC_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 async function getDB() {
-  return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
-      // Clean slate on version bump — ensures corrupted cache is cleared
-      if (oldVersion < 2) {
-        if (db.objectStoreNames.contains(STORE_POSTS)) db.deleteObjectStore(STORE_POSTS);
-        if (db.objectStoreNames.contains(STORE_META))  db.deleteObjectStore(STORE_META);
-      }
-      db.createObjectStore(STORE_POSTS, { keyPath: 'id' });
-      db.createObjectStore(STORE_META);
+  return openDB(DB_NAME, 1, {
+    upgrade(idb) {
+      idb.createObjectStore(STORE_POSTS, { keyPath: 'id' });
+      idb.createObjectStore(STORE_META);
     },
   });
 }
 
+// Compute counts for all time filters from a list of posts
+function computeCounts(posts) {
+  const now  = new Date();
+  const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
+  const weekStart  = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  let all = 0, today = 0, week = 0, month = 0;
+  for (const p of posts) {
+    const d = p.publishedAt?.seconds
+      ? new Date(p.publishedAt.seconds * 1000)
+      : null;
+    all++;
+    if (d) {
+      if (d >= todayStart)  today++;
+      if (d >= weekStart)   week++;
+      if (d >= monthStart)  month++;
+    }
+  }
+  return { all, today, week, month };
+}
+
 export function usePostsWithCache(category = 'all') {
-  const [posts, setPosts]     = useState([]);
+  // All posts from cache matching current category + time filter
+  const [allFiltered, setAllFiltered] = useState([]);
+  // What's actually shown on screen (paginated slice)
+  const [visiblePosts, setVisiblePosts] = useState([]);
+  const [page, setPage]       = useState(1);
+  const [counts, setCounts]   = useState({ all: 0, today: 0, week: 0, month: 0 });
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError]     = useState(null);
 
+  // ── Main sync effect ─────────────────────────────────────────────────────
   useEffect(() => {
+    let cancelled = false;
+
     async function syncIntelligence() {
       setLoading(true);
+      setPage(1);
       try {
         const idb = await getDB();
 
-        // ── 1. Check cache freshness ────────────────────────────────────────
-        const lastSync    = await idb.get(STORE_META, 'lastSync');    // ms timestamp
-        const cachedCount = (await idb.count(STORE_POSTS)) || 0;
-        const now         = Date.now();
-        const isStale     = !lastSync || (now - lastSync) > CACHE_TTL_MS;
-        const isEmpty     = cachedCount === 0;
+        const lastSync   = await idb.get(STORE_META, 'lastSync');   // ms
+        const cachedCount = await idb.count(STORE_POSTS);
+        const now        = Date.now();
+        const needsSync  = !lastSync || (now - lastSync) > SYNC_INTERVAL;
 
-        // ── 2. Decide what to fetch from Firebase ───────────────────────────
-        if (isEmpty) {
-          // ── First visit: fetch the latest BATCH_SIZE posts ────────────────
-          console.log('📥 First load — fetching initial batch from Firebase...');
+        if (cachedCount === 0) {
+          // ── First ever visit: fetch initial batch ───────────────────────
+          setSyncing(true);
+          console.log(`🚀 First load — fetching ${INITIAL_FETCH} posts from Firebase...`);
           const snap = await getDocs(
             query(
               collection(db, 'posts'),
               orderBy('publishedAt', 'desc'),
-              limit(BATCH_SIZE)
+              limit(INITIAL_FETCH)
             )
           );
+          if (cancelled) return;
           const incoming = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          console.log(`   ✅ Got ${incoming.length} posts`);
+          console.log(`   ✅ Received ${incoming.length} posts`);
 
           const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
           for (const p of incoming) tx.objectStore(STORE_POSTS).put(p);
           tx.objectStore(STORE_META).put(now, 'lastSync');
           await tx.done;
+          setSyncing(false);
 
-        } else if (isStale) {
-          // ── Returning user after 24h: fetch only new posts since lastSync ──
+        } else if (needsSync) {
+          // ── Returning after 24h: fetch only new posts ──────────────────
+          setSyncing(true);
           const since = Timestamp.fromMillis(lastSync);
-          console.log(`🔄 Incremental sync since ${since.toDate().toLocaleString()}...`);
+          console.log(`🔄 Incremental sync — fetching posts since ${since.toDate().toLocaleString()}...`);
           const snap = await getDocs(
             query(
               collection(db, 'posts'),
               where('publishedAt', '>', since),
               orderBy('publishedAt', 'desc'),
-              limit(200) // new posts since last visit are usually <50
+              limit(200)
             )
           );
+          if (cancelled) return;
           const incoming = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           console.log(`   ✅ ${incoming.length} new post(s) since last visit`);
 
-          if (incoming.length > 0) {
-            const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
-            for (const p of incoming) tx.objectStore(STORE_POSTS).put(p);
-            tx.objectStore(STORE_META).put(now, 'lastSync');
-            await tx.done;
-          }
+          const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
+          for (const p of incoming) tx.objectStore(STORE_POSTS).put(p);
+          tx.objectStore(STORE_META).put(now, 'lastSync');
+          await tx.done;
+          setSyncing(false);
+
         } else {
-          console.log(`⚡ Cache is fresh (${cachedCount} posts). Zero Firebase reads.`);
+          console.log(`⚡ Cache fresh (${cachedCount} posts). 0 Firebase reads.`);
         }
 
-        // ── 3. Serve from local cache (ZERO Firebase cost) ─────────────────
-        const allCached = await idb.getAll(STORE_POSTS);
-        const filtered  = allCached
-          .filter(p => category === 'all' || p.category === category)
-          .sort((a, b) => (b.publishedAt?.seconds || 0) - (a.publishedAt?.seconds || 0))
-          .slice(0, MAX_CACHE_POSTS);
+        // ── Serve from IndexedDB (0 Firebase cost) ──────────────────────
+        const all = await idb.getAll(STORE_POSTS);
+        if (cancelled) return;
 
-        setPosts(filtered);
+        // Filter by category
+        const catFiltered = category === 'all'
+          ? all
+          : all.filter(p => p.category === category);
+
+        // Sort by newest first
+        catFiltered.sort((a, b) =>
+          (b.publishedAt?.seconds || 0) - (a.publishedAt?.seconds || 0)
+        );
+
+        // Compute counts for this category across all time windows
+        setCounts(computeCounts(catFiltered));
+        setAllFiltered(catFiltered);
+        setVisiblePosts(catFiltered.slice(0, PAGE_SIZE));
 
       } catch (err) {
-        console.error('Smart Sync Failed:', err);
+        if (cancelled) return;
+        console.error('Sync error:', err);
         setError(err.message);
+        // Fallback: show whatever is in cache
         try {
           const idb = await getDB();
-          const cached = await idb.getAll(STORE_POSTS);
-          setPosts(cached.filter(p => category === 'all' || p.category === category));
-        } catch { /* nothing we can do */ }
+          const all = await idb.getAll(STORE_POSTS);
+          const catFiltered = category === 'all'
+            ? all
+            : all.filter(p => p.category === category);
+          catFiltered.sort((a, b) =>
+            (b.publishedAt?.seconds || 0) - (a.publishedAt?.seconds || 0)
+          );
+          setCounts(computeCounts(catFiltered));
+          setAllFiltered(catFiltered);
+          setVisiblePosts(catFiltered.slice(0, PAGE_SIZE));
+        } catch { /* truly offline */ }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     syncIntelligence();
+    return () => { cancelled = true; };
   }, [category]);
 
-  // Dev-only: hard reset — clears IndexedDB and re-fetches
+  // ── Update visible slice when page changes ───────────────────────────────
+  useEffect(() => {
+    setVisiblePosts(allFiltered.slice(0, page * PAGE_SIZE));
+  }, [page, allFiltered]);
+
+  // ── Load More (pure local, 0 Firebase reads) ─────────────────────────────
+  const loadMore = useCallback(() => {
+    setPage(p => p + 1);
+  }, []);
+
+  const hasMore = visiblePosts.length < allFiltered.length;
+
+  // ── Dev: hard reset ───────────────────────────────────────────────────────
   const refreshCache = async () => {
     try {
       const idb = await getDB();
@@ -125,5 +200,15 @@ export function usePostsWithCache(category = 'all') {
     window.location.reload();
   };
 
-  return { posts, loading, error, refreshCache };
+  return {
+    posts: visiblePosts,
+    allCount: allFiltered.length,
+    counts,       // { all, today, week, month } — exact counts per filter
+    hasMore,
+    loadMore,
+    loading,
+    syncing,
+    error,
+    refreshCache,
+  };
 }
