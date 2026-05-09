@@ -25,24 +25,13 @@ jobs:
         working-directory: automation
         run: npm ci
 
-      - name: Write Firebase service account
-        working-directory: automation
-        env:
-          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-        run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > service-account.json
-
       - name: Run automation script
         working-directory: automation
         env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: node index.js
-
-      - name: Cleanup service account file
-        if: always()
-        working-directory: automation
-        run: rm -f service-account.json
