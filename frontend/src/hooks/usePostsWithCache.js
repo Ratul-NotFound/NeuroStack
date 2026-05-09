@@ -18,12 +18,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-const DB_NAME    = 'neurostack-v7';   // fresh cache for educational concept summaries
+const DB_NAME    = 'neurostack-v8';   // fresh cache for educational concept summaries
 const STORE_POSTS = 'posts';
 const STORE_META  = 'meta';
 const PAGE_SIZE  = 50;
 const INITIAL_FETCH = 500;            // reads on first ever visit
-const SYNC_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+const SYNC_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours
 
 async function getDB() {
   return openDB(DB_NAME, 1, {
