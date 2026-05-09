@@ -15,6 +15,7 @@ import { PostDetails } from './pages/PostDetails';
 import { NotFound } from './pages/NotFound';
 import { Loader2 } from 'lucide-react';
 import { PWAInstallModal } from './components/PWAInstallModal';
+import { ReloadPrompt } from './components/ReloadPrompt';
 
 // Protected Route Component — only the designated admin UID can pass through
 const ProtectedRoute = ({ children }) => {
@@ -54,6 +55,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <PWAInstallModal />
+      <ReloadPrompt />
       <Routes>
         {/* Public Routes */}
         <Route element={<MainLayout />}>
