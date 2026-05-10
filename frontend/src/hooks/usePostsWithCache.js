@@ -23,7 +23,7 @@ const STORE_POSTS = 'posts';
 const STORE_META  = 'meta';
 const PAGE_SIZE  = 50;
 const INITIAL_FETCH = 500;            // reads on first ever visit
-const SYNC_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours
+const SYNC_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour
 
 async function getDB() {
   return openDB(DB_NAME, 1, {
