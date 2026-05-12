@@ -41,23 +41,23 @@ export function PostCard({ post }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-60" />
         </div>
       )}
-      <div className="p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className={`px-3 py-1 bg-gradient-to-r ${getCategoryGradient(post.category)} text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg shadow-primary/10`}>
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <span className={`px-2.5 py-0.5 bg-gradient-to-r ${getCategoryGradient(post.category)} text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg shadow-primary/10`}>
             {post.category}
           </span>
           <div className="w-1 h-1 rounded-full bg-border" />
-          <span className="text-muted-foreground text-xs flex items-center gap-1.5 font-medium">
-            <Calendar size={14} className="opacity-70" />
+          <span className="text-muted-foreground text-[10px] flex items-center gap-1.5 font-medium">
+            <Calendar size={12} className="opacity-70" />
             {format(publishedDate, 'MMM d, yyyy')}
           </span>
         </div>
 
-        <h2 className="text-2xl font-semibold mb-4 leading-tight tracking-tight group-hover:text-primary transition-colors">
+        <h2 className="text-xl font-semibold mb-3 leading-tight tracking-tight group-hover:text-primary transition-colors line-clamp-2">
           {post.title}
         </h2>
 
-        <div className="prose prose-sm dark:prose-invert line-clamp-4 mb-8 text-foreground/70 leading-relaxed group-hover:text-foreground transition-colors">
+        <div className="prose prose-sm dark:prose-invert line-clamp-3 mb-6 text-foreground/70 leading-relaxed group-hover:text-foreground transition-colors text-xs">
           <ReactMarkdown
             components={{
               a: ({node, ...props}) => <span className="text-primary font-medium" {...props} />
@@ -67,22 +67,22 @@ export function PostCard({ post }) {
           </ReactMarkdown>
         </div>
 
-        <div className="flex items-center justify-between pt-6 border-t border-border/50 mt-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-primary border shadow-sm group-hover:border-primary/30 transition-all">
-              <User size={14} />
+        <div className="flex items-center justify-between pt-4 border-t border-border/50 mt-auto">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center text-primary border shadow-sm group-hover:border-primary/30 transition-all">
+              <User size={12} />
             </div>
-            <span className="text-sm font-semibold tracking-tight">{post.sourceName}</span>
+            <span className="text-xs font-semibold tracking-tight">{post.sourceName}</span>
           </div>
           
           <div className="flex items-center gap-2">
             {post.isCustom && (
-              <span className="text-[10px] bg-amber-500/10 text-amber-600 px-2 py-1 rounded-md font-bold uppercase tracking-wider border border-amber-500/20">
+              <span className="text-[9px] bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider border border-amber-500/20">
                 Original
               </span>
             )}
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-              <ExternalLink size={16} />
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+              <ExternalLink size={14} />
             </div>
           </div>
         </div>
