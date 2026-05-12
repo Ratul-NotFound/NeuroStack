@@ -1,10 +1,24 @@
-# 🧠 NeuroStack — Personal AI Knowledge Hub
+<div align="center">
+  <img src="frontend/public/pwa-512x512.png" width="100" height="100" alt="NeuroStack Logo" />
+  <h1>🧠 NeuroStack — Personal AI Knowledge Hub</h1>
+
+  <p align="center">
+    <a href="https://github.com/Ratul-NotFound/NeuroStack/stargazers"><img src="https://img.shields.io/github/stars/Ratul-NotFound/NeuroStack?color=yellow&style=for-the-badge&logo=github" alt="Stars" /></a>
+    <a href="https://github.com/Ratul-NotFound/NeuroStack/network/members"><img src="https://img.shields.io/github/forks/Ratul-NotFound/NeuroStack?color=blue&style=for-the-badge&logo=github" alt="Forks" /></a>
+    <a href="https://github.com/Ratul-NotFound/NeuroStack/issues"><img src="https://img.shields.io/github/issues/Ratul-NotFound/NeuroStack?color=red&style=for-the-badge&logo=github" alt="Issues" /></a>
+    <a href="https://github.com/Ratul-NotFound/NeuroStack/pulse"><img src="https://img.shields.io/github/last-commit/Ratul-NotFound/NeuroStack?style=for-the-badge&logo=github" alt="Last Commit" /></a>
+  </p>
+
+  <p align="center">
+    <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+    <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />
+    <img src="https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+    <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+  </p>
+</div>
 
 **NeuroStack** is a zero-cost, automation-first personal knowledge repository. It automatically monitors RSS feeds and YouTube channels daily, uses **Gemini 1.5 Flash** to generate structured markdown summaries, and presents everything in a beautiful, PWA-enabled dashboard.
-
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Stack](https://img.shields.io/badge/Stack-React%20%7C%20Firebase%20%7C%20Gemini-orange)
-![Deploy](https://img.shields.io/badge/Deploy-Vercel-black)
 
 ---
 
