@@ -114,12 +114,13 @@ export function Feed() {
                   onChange={e => setSearchQuery(e.target.value)}
                 />
               </div>
-              {import.meta.env.DEV && (
-                <button onClick={refreshCache} title="Clear cache & reload"
-                  className="p-2 sm:p-2.5 bg-card border border-border/50 hover:bg-secondary rounded-xl transition-all text-muted-foreground">
-                  <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
-                </button>
-              )}
+              <button 
+                onClick={refreshCache} 
+                title="Force refresh content and clear local cache"
+                className="p-2 sm:p-2.5 bg-card border border-border/50 hover:bg-secondary rounded-xl transition-all text-muted-foreground hover:text-primary active:scale-95"
+              >
+                <RefreshCcw size={16} className={loading || syncing ? 'animate-spin' : ''} />
+              </button>
             </div>
           </div>
 

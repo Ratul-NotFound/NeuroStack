@@ -39,7 +39,11 @@ export function ReloadPrompt() {
       </div>
       <div className="flex gap-2 mt-2">
         <button
-          onClick={() => updateServiceWorker(true)}
+          onClick={() => {
+            updateServiceWorker(true);
+            // Fallback: if the SW doesn't trigger a reload within 2s, force it
+            setTimeout(() => window.location.reload(true), 2000);
+          }}
           className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
         >
           Update App Now

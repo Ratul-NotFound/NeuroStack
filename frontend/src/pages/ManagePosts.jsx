@@ -44,6 +44,7 @@ export function ManagePosts() {
       summary: post.summary,
       category: post.category,
       link: post.link || '',
+      thumbnail: post.thumbnail || '',
       isCustom: post.isCustom || false,
     });
   };
@@ -136,6 +137,15 @@ export function ManagePosts() {
                     placeholder="https://..."
                   />
                 </div>
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground tracking-widest block mb-1.5">Thumbnail URL</label>
+                <input
+                  className="w-full bg-secondary/30 border border-border/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  value={editForm.thumbnail}
+                  onChange={e => setEditForm({ ...editForm, thumbnail: e.target.value })}
+                  placeholder="https://.../image.jpg"
+                />
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground tracking-widest block mb-1.5">Summary (Markdown)</label>

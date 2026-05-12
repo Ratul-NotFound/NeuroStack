@@ -79,6 +79,16 @@ export function PostDetails() {
             {post.title}
           </h1>
 
+          {post.thumbnail && (
+            <div className="mb-12 rounded-3xl overflow-hidden border border-border/50 shadow-2xl">
+              <img 
+                src={post.thumbnail} 
+                alt={post.title}
+                className="w-full aspect-[21/9] object-cover"
+              />
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-border/50">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-primary border border-border/50 shadow-sm">

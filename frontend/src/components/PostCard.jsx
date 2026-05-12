@@ -14,6 +14,17 @@ export function PostCard({ post }) {
       to={`/post/${post.id}`}
       className="group block bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-[0_2px_10px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_30px_50px_-12px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] active:scale-[0.98] border-b-4 hover:border-primary/50"
     >
+      {post.thumbnail && (
+        <div className="relative aspect-video w-full overflow-hidden">
+          <img 
+            src={post.thumbnail} 
+            alt={post.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-60" />
+        </div>
+      )}
       <div className="p-8">
         <div className="flex items-center gap-3 mb-6">
           <span className="px-3 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full uppercase tracking-widest">

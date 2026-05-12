@@ -18,12 +18,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-const DB_NAME    = 'neurostack-v9';   // fresh cache for 1-read smart sync validation
+const DB_NAME    = 'neurostack-v10';  // Bumped version for fetchedAt-based sync
 const STORE_POSTS = 'posts';
 const STORE_META  = 'meta';
 const PAGE_SIZE  = 50;
-const INITIAL_FETCH = 500;            // reads on first ever visit
-const SYNC_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour
+const INITIAL_FETCH = 500;            
+const SYNC_INTERVAL = 1 * 60 * 60 * 1000; 
 
 async function getDB() {
   return openDB(DB_NAME, 1, {
@@ -77,14 +77,15 @@ export function usePostsWithCache(category = 'all') {
       try {
         const idb = await getDB();
 
-        let lastSync = await idb.get(STORE_META, 'lastSync') || 0; // stores max publishedAt in ms
+        let lastFetchedAt = await idb.get(STORE_META, 'lastFetchedAt') || 0; 
         const cachedCount = await idb.count(STORE_POSTS);
         let needsSync = false;
 
         if (cachedCount === 0) {
           // ── First ever visit: fetch initial batch ───────────────────────
           setSyncing(true);
-          console.log(`🚀 First load — fetching ${INITIAL_FETCH} posts from Firebase...`);
+          console.log(`🚀 Initializing cache — fetching latest ${INITIAL_FETCH} posts...`);
+          // We still use publishedAt for initial view so users see the newest content first
           const snap = await getDocs(
             query(collection(db, 'posts'), orderBy('publishedAt', 'desc'), limit(INITIAL_FETCH))
           );
@@ -93,61 +94,62 @@ export function usePostsWithCache(category = 'all') {
           console.log(`   ✅ Received ${incoming.length} posts`);
 
           const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
-          let maxMs = 0;
+          let maxFetchedMs = 0;
           for (const p of incoming) {
             tx.objectStore(STORE_POSTS).put(p);
-            const pMs = p.publishedAt?.seconds ? p.publishedAt.seconds * 1000 : 0;
-            if (pMs > maxMs) maxMs = pMs;
+            // Track max fetchedAt to anchor future delta-syncs
+            const fMs = p.fetchedAt?.seconds ? p.fetchedAt.seconds * 1000 : 0;
+            if (fMs > maxFetchedMs) maxFetchedMs = fMs;
           }
-          tx.objectStore(STORE_META).put(maxMs, 'lastSync');
+          tx.objectStore(STORE_META).put(maxFetchedMs, 'lastFetchedAt');
           await tx.done;
           setSyncing(false);
 
         } else {
-          // ── Smart Sync: 1-Read Validation ──────────────────────────────
-          // Cost: 1 Read. Checks if the server has a post newer than our cache.
+          // ── Smart Sync: Use fetchedAt for reliable update detection ─────
+          // This fixes the bug where posts with older publishedAt added recently were missed.
           const latestSnap = await getDocs(
-            query(collection(db, 'posts'), orderBy('publishedAt', 'desc'), limit(1))
+            query(collection(db, 'posts'), orderBy('fetchedAt', 'desc'), limit(1))
           );
           
           if (!latestSnap.empty) {
             const serverLatest = latestSnap.docs[0].data();
-            const serverMs = serverLatest.publishedAt?.seconds ? serverLatest.publishedAt.seconds * 1000 : 0;
+            const serverMs = serverLatest.fetchedAt?.seconds ? serverLatest.fetchedAt.seconds * 1000 : 0;
             
-            if (serverMs > lastSync) {
+            if (serverMs > lastFetchedAt) {
               needsSync = true;
-              console.log(`🔄 New news detected! (Server: ${new Date(serverMs).toLocaleTimeString()} > Local: ${new Date(lastSync).toLocaleTimeString()})`);
+              console.log(`🔄 New data found! (Server fetch: ${new Date(serverMs).toLocaleTimeString()} > Local: ${new Date(lastFetchedAt).toLocaleTimeString()})`);
             }
           }
 
           if (needsSync) {
             setSyncing(true);
-            const since = Timestamp.fromMillis(lastSync);
-            console.log(`📥 Downloading missing posts...`);
+            const since = Timestamp.fromMillis(lastFetchedAt);
+            console.log(`📥 Syncing updates since ${new Date(lastFetchedAt).toISOString()}...`);
             const snap = await getDocs(
               query(
                 collection(db, 'posts'),
-                where('publishedAt', '>', since),
-                orderBy('publishedAt', 'desc'),
-                limit(200)
+                where('fetchedAt', '>', since),
+                orderBy('fetchedAt', 'desc'),
+                limit(300)
               )
             );
             if (cancelled) return;
             const incoming = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            console.log(`   ✅ ${incoming.length} new post(s) added to cache`);
+            console.log(`   ✅ ${incoming.length} new post(s) downloaded`);
 
             const tx = idb.transaction([STORE_POSTS, STORE_META], 'readwrite');
-            let maxMs = lastSync;
+            let maxFetchedMs = lastFetchedAt;
             for (const p of incoming) {
               tx.objectStore(STORE_POSTS).put(p);
-              const pMs = p.publishedAt?.seconds ? p.publishedAt.seconds * 1000 : 0;
-              if (pMs > maxMs) maxMs = pMs;
+              const fMs = p.fetchedAt?.seconds ? p.fetchedAt.seconds * 1000 : 0;
+              if (fMs > maxFetchedMs) maxFetchedMs = fMs;
             }
-            tx.objectStore(STORE_META).put(maxMs, 'lastSync');
+            tx.objectStore(STORE_META).put(maxFetchedMs, 'lastFetchedAt');
             await tx.done;
             setSyncing(false);
           } else {
-            console.log(`⚡ Cache is perfectly up to date (${cachedCount} posts). Total Cost: 1 Firebase Read.`);
+            console.log(`⚡ Content is up to date (${cachedCount} posts).`);
           }
         }
 

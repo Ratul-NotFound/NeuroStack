@@ -110,11 +110,20 @@ export async function fetchRSS(url, lastFetch) {
           item.summary ||
           '';
 
+        // Extract thumbnail
+        const thumbnail = 
+          item.mediaGroup?.['media:thumbnail']?.[0]?.$.url || 
+          item.thumbnail?.$.url || 
+          item.enclosure?.url ||
+          (Array.isArray(item.enclosures) ? item.enclosures[0]?.url : null) ||
+          null;
+
         return {
           title: (item.title || 'Untitled').trim(),
           link: item.link || item.guid || '',
           description: typeof description === 'string' ? description : String(description),
           content: item.contentEncoded || item.content || description,
+          thumbnail: thumbnail, // New field
           publishedAt: new Date(item.pubDate || item.isoDate || Date.now()),
           sourceUrl: feed.link || feedUrl,
           tags: Array.isArray(item.categories) ? item.categories : (item.categories ? [item.categories] : []),

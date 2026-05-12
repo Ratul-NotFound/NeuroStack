@@ -11,6 +11,7 @@ export function NewPost() {
     title: '',
     summary: '',
     link: '',
+    thumbnail: '', // New field
     sourceName: 'Admin',
     category: '',
   });
@@ -83,6 +84,15 @@ export function NewPost() {
               placeholder="https://..."
               value={post.link}
               onChange={e => setPost({ ...post, link: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Thumbnail URL (Optional)</label>
+            <input
+              className="w-full bg-secondary/30 border rounded-xl p-3 outline-none focus:ring-2 focus:ring-primary"
+              placeholder="https://.../image.jpg"
+              value={post.thumbnail}
+              onChange={e => setPost({ ...post, thumbnail: e.target.value })}
             />
           </div>
         </div>

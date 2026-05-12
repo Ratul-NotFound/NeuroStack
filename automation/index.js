@@ -205,6 +205,7 @@ async function main() {
         sourceName: source.name,
         sourceUrl: item.sourceUrl || source.url,
         category: finalCategory,
+        thumbnail: item.thumbnail || null,
         publishedAt: item.publishedAt instanceof Date
           ? Timestamp.fromDate(item.publishedAt)
           : Timestamp.now(),
