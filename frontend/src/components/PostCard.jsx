@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
-import { ExternalLink, Calendar, Tag, User } from 'lucide-react';
+import { ExternalLink, Calendar, Tag, User, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const categoryColors = {
@@ -18,7 +18,7 @@ const categoryColors = {
 
 const getCategoryGradient = (cat) => categoryColors[cat] || categoryColors['general'];
 
-export function PostCard({ post }) {
+export function PostCard({ post, isBookmarked, onBookmark }) {
   const publishedDate = post.publishedAt?.seconds 
     ? new Date(post.publishedAt.seconds * 1000) 
     : new Date();
@@ -30,6 +30,23 @@ export function PostCard({ post }) {
     >
       {/* Dynamic Category Accent Stripe */}
       <div className={`absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b ${getCategoryGradient(post.category)} opacity-70`} />
+      
+      {/* Bookmark Toggle */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onBookmark(post);
+        }}
+        className={`absolute top-4 right-4 z-20 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 backdrop-blur-md border ${
+          isBookmarked 
+            ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' 
+            : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+        }`}
+      >
+        <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} className={isBookmarked ? "animate-in zoom-in-125 duration-300" : ""} />
+      </button>
+
       {post.thumbnail && (
         <div className="relative aspect-video w-full overflow-hidden">
           <img 
