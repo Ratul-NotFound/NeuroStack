@@ -4,7 +4,19 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
-import { ArrowLeft, ExternalLink, Calendar, User, Share2, Tag, Twitter, Linkedin, Link2, Check } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Calendar, User, Share2, Tag, Link2, Check } from 'lucide-react';
+
+const XIcon = (props) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+  </svg>
+);
+
+const LinkedInIcon = (props) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+  </svg>
+);
 import { Loader2 } from 'lucide-react';
 
 export function PostDetails() {
@@ -121,16 +133,16 @@ export function PostDetails() {
               <button 
                 onClick={shareOnX}
                 title="Share on X"
-                className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-[#1DA1F2]"
+                className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-white"
               >
-                <Twitter size={20} fill="currentColor" className="stroke-none" />
+                <XIcon className="w-5 h-5" />
               </button>
               <button 
                 onClick={shareOnLinkedIn}
                 title="Share on LinkedIn"
                 className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-[#0A66C2]"
               >
-                <Linkedin size={20} fill="currentColor" className="stroke-none" />
+                <LinkedInIcon className="w-5 h-5" />
               </button>
               <button 
                 onClick={handleCopy}
