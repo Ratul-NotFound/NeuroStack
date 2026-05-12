@@ -54,14 +54,19 @@ export function Sidebar({ categories, className }) {
               to="/"
               end
               className={({ isActive }) => cn(
-                "flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200",
+                "group flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl transition-all duration-300 relative overflow-hidden",
                 isActive 
-                  ? "bg-primary/10 text-primary shadow-sm" 
+                  ? "bg-primary/10 text-primary shadow-[0_0_20px_-5px_rgba(99,102,241,0.3)]" 
                   : "text-muted-foreground hover:bg-secondary/80 hover:text-primary"
               )}
             >
-              <LayoutGrid size={18} />
-              All Content
+              {({ isActive }) => (
+                <>
+                  <LayoutGrid size={18} className={cn("transition-colors", isActive ? "text-primary" : "group-hover:text-primary")} />
+                  <span>All Content</span>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.5)]" />}
+                </>
+              )}
             </NavLink>
             
             {categories.map((cat) => (
@@ -69,14 +74,19 @@ export function Sidebar({ categories, className }) {
                 key={cat.id}
                 to={`/category/${cat.id}`}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200",
+                  "group flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl transition-all duration-300 relative overflow-hidden",
                   isActive 
-                    ? "bg-primary/10 text-primary shadow-sm" 
+                    ? "bg-primary/10 text-primary shadow-[0_0_20px_-5px_rgba(99,102,241,0.3)]" 
                     : "text-muted-foreground hover:bg-secondary/80 hover:text-primary"
                 )}
               >
-                <Hash size={18} />
-                {cat.name}
+                {({ isActive }) => (
+                  <>
+                    <Hash size={18} className={cn("transition-colors", isActive ? "text-primary" : "group-hover:text-primary")} />
+                    <span>{cat.name}</span>
+                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.5)]" />}
+                  </>
+                )}
               </NavLink>
             ))}
           </div>

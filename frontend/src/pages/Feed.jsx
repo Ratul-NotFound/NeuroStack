@@ -67,7 +67,11 @@ export function Feed() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 py-3 sm:px-6 sm:py-5 flex-shrink-0">
-        <div className="max-w-4xl mx-auto flex flex-col gap-3 sm:gap-5">
+        {/* Subtle Decorative Glows */}
+        <div className="absolute top-0 left-1/4 w-1/2 h-full bg-primary/5 blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 blur-[60px] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto flex flex-col gap-3 sm:gap-5 relative z-10">
 
           {/* Title row */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
