@@ -219,6 +219,33 @@ export function usePostsWithCache(category = 'all') {
   const hasMore = visiblePosts.length < allFiltered.length;
 
   // ── Dev: hard reset ───────────────────────────────────────────────────────
+  const [bookmarks, setBookmarks] = useState(new Set());
+
+  // Load bookmarks on mount
+  useEffect(() => {
+    async function loadBookmarks() {
+      const idb = await getDB();
+      const keys = await idb.getAllKeys(STORE_BOOKMARKS);
+      setBookmarks(new Set(keys));
+    }
+    loadBookmarks();
+  }, []);
+
+  const toggleBookmark = async (post) => {
+    const idb = await getDB();
+    const isSaved = bookmarks.has(post.id);
+    const newBookmarks = new Set(bookmarks);
+
+    if (isSaved) {
+      await idb.delete(STORE_BOOKMARKS, post.id);
+      newBookmarks.delete(post.id);
+    } else {
+      await idb.put(STORE_BOOKMARKS, { ...post, savedAt: Date.now() });
+      newBookmarks.add(post.id);
+    }
+    setBookmarks(newBookmarks);
+  };
+
   const refreshCache = async () => {
     try {
       const idb = await getDB();
@@ -240,5 +267,7 @@ export function usePostsWithCache(category = 'all') {
     syncing,
     error,
     refreshCache,
+    bookmarks,
+    toggleBookmark,
   };
 }
