@@ -300,4 +300,8 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ---
 
-*Built with ❤️ for the AI-curious. Powered by Gemini, Firebase, and GitHub Actions.*
+*Built with ❤️ through Pair Programming. Powered by Gemini, Firebase, and GitHub Actions.*
+
+---
+> [!TIP]
+> This project was built in collaboration with an AI coding partner. 🚀
