@@ -8,12 +8,13 @@ export function Feed() {
   const { categoryId } = useParams();
   const {
     posts, counts, hasMore, loadMore,
-    loading, syncing, error, refreshCache
+    loading, syncing, error, refreshCache,
+    bookmarks, toggleBookmark
   } = usePostsWithCache(categoryId || 'all');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder,   setSortOrder]   = useState('latest');
-  const [timeFilter,  setTimeFilter]  = useState('all');
+  const [timeFilter,  setTimeFilter]  = useState('all'); // all, week, today, saved
 
   const pageTitle = categoryId
     ? categoryId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
@@ -33,6 +34,8 @@ export function Feed() {
         if (!matches) return false;
       }
       if (timeFilter !== 'all') {
+        if (timeFilter === 'saved') return bookmarks.has(post.id);
+
         const d = post.publishedAt?.seconds
           ? new Date(post.publishedAt.seconds * 1000) : null;
         if (!d) return false;
@@ -54,7 +57,7 @@ export function Feed() {
   // Exact count for the current time filter (from cache, not Firebase)
   const activeCount = timeFilter === 'today' ? counts.today
     : timeFilter === 'week'  ? counts.week
-    : timeFilter === 'month' ? counts.month
+    : timeFilter === 'saved' ? bookmarks.size
     : counts.all;
 
   const filterBtnClass = (active) =>
@@ -144,6 +147,10 @@ export function Feed() {
                 Today
                 {!loading && <span className="ml-1 opacity-60">({counts.today.toLocaleString()})</span>}
               </button>
+              <button onClick={() => setTimeFilter('saved')} className={filterBtnClass(timeFilter === 'saved')}>
+                Saved
+                <span className="ml-1 opacity-60">({bookmarks.size})</span>
+              </button>
             </div>
 
             {/* Sort toggle */}
@@ -198,7 +205,12 @@ export function Feed() {
           {displayedPosts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {displayedPosts.map(post => (
-                <PostCard key={post.id} post={post} />
+                <PostCard 
+                  key={post.id} 
+                  post={post} 
+                  isBookmarked={bookmarks.has(post.id)}
+                  onBookmark={toggleBookmark}
+                />
               ))}
             </div>
           )}
