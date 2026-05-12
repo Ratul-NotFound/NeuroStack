@@ -18,18 +18,25 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-const DB_NAME    = 'neurostack-v10';  // Bumped version for fetchedAt-based sync
+const DB_NAME    = 'neurostack-v11';  // v11: Added bookmarks support
 const STORE_POSTS = 'posts';
-const STORE_META  = 'meta';
+const STORE_META  = 'metadata';
+const STORE_BOOKMARKS = 'bookmarks';
 const PAGE_SIZE  = 50;
 const INITIAL_FETCH = 500;            
 const SYNC_INTERVAL = 1 * 60 * 60 * 1000; 
 
 async function getDB() {
-  return openDB(DB_NAME, 1, {
-    upgrade(idb) {
-      idb.createObjectStore(STORE_POSTS, { keyPath: 'id' });
-      idb.createObjectStore(STORE_META);
+  return openDB(DB_NAME, 11, {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 11) {
+        if (db.objectStoreNames.contains(STORE_POSTS)) db.deleteObjectStore(STORE_POSTS);
+        if (db.objectStoreNames.contains(STORE_META)) db.deleteObjectStore(STORE_META);
+        if (db.objectStoreNames.contains(STORE_BOOKMARKS)) db.deleteObjectStore(STORE_BOOKMARKS);
+      }
+      db.createObjectStore(STORE_POSTS, { keyPath: 'id' });
+      db.createObjectStore(STORE_META);
+      db.createObjectStore(STORE_BOOKMARKS, { keyPath: 'id' });
     },
   });
 }
