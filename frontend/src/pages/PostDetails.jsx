@@ -4,7 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
-import { ArrowLeft, ExternalLink, Calendar, User, Share2, Tag } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Calendar, User, Share2, Tag, Twitter, Linkedin, Link2, Check } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 export function PostDetails() {
@@ -47,6 +47,23 @@ export function PostDetails() {
       </div>
     );
   }
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(post.link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareOnX = () => {
+    const text = encodeURIComponent(`Check out this AI insight on NeuroStack: ${post.title}`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(post.link)}`, '_blank');
+  };
+
+  const shareOnLinkedIn = () => {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(post.link)}`, '_blank');
+  };
 
   const publishedDate = post.publishedAt?.seconds 
     ? new Date(post.publishedAt.seconds * 1000) 
@@ -100,19 +117,38 @@ export function PostDetails() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={shareOnX}
+                title="Share on X"
+                className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-[#1DA1F2]"
+              >
+                <Twitter size={20} fill="currentColor" className="stroke-none" />
+              </button>
+              <button 
+                onClick={shareOnLinkedIn}
+                title="Share on LinkedIn"
+                className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-[#0A66C2]"
+              >
+                <Linkedin size={20} fill="currentColor" className="stroke-none" />
+              </button>
+              <button 
+                onClick={handleCopy}
+                title="Copy Link"
+                className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-primary relative"
+              >
+                {copied ? <Check size={20} className="text-green-500" /> : <Link2 size={20} />}
+                {copied && <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-green-500 text-white text-[10px] px-2 py-1 rounded-md animate-in fade-in slide-in-from-bottom-2">Copied!</span>}
+              </button>
               <a 
                 href={post.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
-                View Original Content
+                View Original
                 <ExternalLink size={18} />
               </a>
-              <button className="p-3 bg-card border border-border/50 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-primary">
-                <Share2 size={20} />
-              </button>
             </div>
           </div>
         </header>
